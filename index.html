@@ -323,18 +323,16 @@ function getAlerta(halcon, operativos, recargas) {
     if (ev.halcon !== halcon) continue;
     const em   = toMin(ev.hora);
     const diff = em - nm;
-    if (diff === 0)                    return { cls:"row-ops-now",  tagCls:"tag-ops-now",   tagTxt:"▶ EN OPERATIVO" };
-    if (diff > 0 && diff <= PROX_MIN)  return { cls:"row-ops-prox", tagCls:"tag-ops-prox",  tagTxt:"⏱ OP. EN " + diff + " min" };
-    if (diff > PROX_MIN && diff <= 60) return { cls:"row-ops-prox", tagCls:"tag-ops-prox",  tagTxt:"📍 OP. " + cleanHora(ev.hora) };
+    if (diff === 0)                   return { cls:"row-ops-now",  tagCls:"tag-ops-now",  tagTxt:"▶ EN OPERATIVO" };
+    if (diff > 0 && diff <= 10)       return { cls:"row-ops-prox", tagCls:"tag-ops-prox", tagTxt:"⏱ OP. EN " + diff + " min" };
   }
 
   for (const ev of (recargas || [])) {
     if (ev.halcon !== halcon) continue;
     const em   = toMin(ev.hora);
     const diff = em - nm;
-    if (diff === 0)                    return { cls:"row-fuel-now",  tagCls:"tag-fuel-now",  tagTxt:"⛽ EN RECARGA" };
-    if (diff > 0 && diff <= PROX_MIN)  return { cls:"row-fuel-prox", tagCls:"tag-fuel-prox", tagTxt:"⏱ RECARGA EN " + diff + " min" };
-    if (diff > PROX_MIN && diff <= 60) return { cls:"row-fuel-prox", tagCls:"tag-fuel-prox", tagTxt:"⛽ RECARGA " + cleanHora(ev.hora) };
+    if (diff === 0)                   return { cls:"row-fuel-now",  tagCls:"tag-fuel-now",  tagTxt:"⛽ EN RECARGA" };
+    if (diff > 0 && diff <= 10)       return { cls:"row-fuel-prox", tagCls:"tag-fuel-prox", tagTxt:"⏱ RECARGA EN " + diff + " min" };
   }
 
   return null;
@@ -361,9 +359,8 @@ function mkCard(id, d) {
   const opsRows = ops.map(function(r) {
     const nm = nowMin(), em = toMin(cleanHora(r.hora)), diff = em - nm;
     var rowCls = '', tagHtml = '';
-    if (diff === 0)                   { rowCls = 'row-ops-now';  tagHtml = '<span class="tag tag-ops-now">▶ EN CURSO</span>'; }
-    else if (diff > 0 && diff <= 30) { rowCls = 'row-ops-prox'; tagHtml = '<span class="tag tag-ops-prox">⏱ EN ' + diff + ' min</span>'; }
-    else if (diff > 30 && diff <= 60){ rowCls = 'row-ops-prox'; tagHtml = '<span class="tag tag-ops-prox">📍 ' + cleanHora(r.hora) + '</span>'; }
+    if (diff === 0)                  { rowCls = 'row-ops-now';  tagHtml = '<span class="tag tag-ops-now">▶ EN OPERATIVO</span>'; }
+    else if (diff > 0 && diff <= 10){ rowCls = 'row-ops-prox'; tagHtml = '<span class="tag tag-ops-prox">⏱ EN ' + diff + ' min</span>'; }
     return '<tr class="' + rowCls + '">'
       + '<td style="width:54px"><span class="hora">' + esc(cleanHora(r.hora)) + '</span></td>'
       + '<td style="width:54px"><span class="bh">' + esc(r.halcon) + '</span></td>'
@@ -374,9 +371,8 @@ function mkCard(id, d) {
   const fuelRows = fuel.map(function(r) {
     const nm = nowMin(), em = toMin(cleanHora(r.hora)), diff = em - nm;
     var rowCls = '', tagHtml = '';
-    if (diff === 0)                   { rowCls = 'row-fuel-now';  tagHtml = '<span class="tag tag-fuel-now">⛽ EN CURSO</span>'; }
-    else if (diff > 0 && diff <= 30) { rowCls = 'row-fuel-prox'; tagHtml = '<span class="tag tag-fuel-prox">⏱ EN ' + diff + ' min</span>'; }
-    else if (diff > 30 && diff <= 60){ rowCls = 'row-fuel-prox'; tagHtml = '<span class="tag tag-fuel-prox">⛽ ' + cleanHora(r.hora) + '</span>'; }
+    if (diff === 0)                  { rowCls = 'row-fuel-now';  tagHtml = '<span class="tag tag-fuel-now">⛽ EN RECARGA</span>'; }
+    else if (diff > 0 && diff <= 10){ rowCls = 'row-fuel-prox'; tagHtml = '<span class="tag tag-fuel-prox">⏱ EN ' + diff + ' min</span>'; }
     return '<tr class="' + rowCls + '">'
       + '<td style="width:54px"><span class="hora">' + esc(cleanHora(r.hora)) + '</span></td>'
       + '<td style="width:54px"><span class="bh">' + esc(r.halcon) + '</span></td>'
