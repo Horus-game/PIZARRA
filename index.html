@@ -345,66 +345,67 @@ function mkCard(id, d) {
   const ops  = d.operativos   || [];
   const fuel = d.recargas     || [];
 
-  // Filas de distribución con alertas
-  const distRows = dist.map(r => {
+  const distRows = dist.map(function(r) {
     const alerta  = getAlerta(r.halcon, ops, fuel);
-    const tagHtml = alerta
-      ? `<span class="tag ${alerta.tagCls}">${esc(alerta.tagTxt)}</span>`
-      : "";
-    return `<tr class="${alerta ? alerta.cls : ''}">
-      <td style="width:52px"><span class="bh">${esc(r.halcon)}</span></td>
-      <td><span class="sector">${esc(r.sector)}</span>${tagHtml}</td>
-      <td style="width:36%">${(r.agentes||[]).map(a=>`<span class="ba">${esc(a)}</span>`).join("")}</td>
-    </tr>`;
+    const tagHtml = alerta ? '<span class="tag ' + alerta.tagCls + '">' + esc(alerta.tagTxt) + '</span>' : "";
+    return '<tr class="' + (alerta ? alerta.cls : '') + '">'
+      + '<td style="width:52px"><span class="bh">' + esc(r.halcon) + '</span></td>'
+      + '<td><span class="sector">' + esc(r.sector) + '</span>' + tagHtml + '</td>'
+      + '<td style="width:36%">' + (r.agentes||[]).map(function(a){ return '<span class="ba">' + esc(a) + '</span>'; }).join("") + '</td>'
+      + '</tr>';
   }).join("");
 
-  // Filas de operativos
-  const opsRows = ops.map(r => `<tr>
-    <td style="width:54px"><span class="hora">${esc(cleanHora(r.hora))}</span></td>
-    <td style="width:54px"><span class="bh">${esc(r.halcon)}</span></td>
-    <td><span class="sector">${esc(r.lugar)}</span></td>
-  </tr>`).join("");
+  const opsRows = ops.map(function(r) {
+    return '<tr>'
+      + '<td style="width:54px"><span class="hora">' + esc(cleanHora(r.hora)) + '</span></td>'
+      + '<td style="width:54px"><span class="bh">' + esc(r.halcon) + '</span></td>'
+      + '<td><span class="sector">' + esc(r.lugar) + '</span></td>'
+      + '</tr>';
+  }).join("");
 
-  // Filas de recargas
-  const fuelRows = fuel.map(r => `<tr>
-    <td style="width:54px"><span class="hora">${esc(cleanHora(r.hora))}</span></td>
-    <td style="width:54px"><span class="bh">${esc(r.halcon)}</span></td>
-    <td><span class="sector">${esc(r.lugar)}</span></td>
-  </tr>`).join("");
+  const fuelRows = fuel.map(function(r) {
+    return '<tr>'
+      + '<td style="width:54px"><span class="hora">' + esc(cleanHora(r.hora)) + '</span></td>'
+      + '<td style="width:54px"><span class="bh">' + esc(r.halcon) + '</span></td>'
+      + '<td><span class="sector">' + esc(r.lugar) + '</span></td>'
+      + '</tr>';
+  }).join("");
+
+  const distTable = dist.length
+    ? '<table class="tbl"><thead><tr><th style="width:52px">Halcón</th><th>Sector</th><th style="width:36%">Agentes</th></tr></thead><tbody>' + distRows + '</tbody></table>'
+    : '<div class="empty">Sin unidades asignadas</div>';
+
+  const opsSection = activeTab !== "ALL"
+    ? '<div class="sec ops">'
+        + '<div class="sec-hdr"><span class="sec-ico">📍</span>Operativos programados</div>'
+        + (ops.length
+            ? '<table class="tbl"><thead><tr><th style="width:54px">Hora</th><th style="width:54px">Halcón</th><th>Lugar</th></tr></thead><tbody>' + opsRows + '</tbody></table>'
+            : '<div class="empty">Sin operativos programados</div>')
+        + '</div>'
+        + '<div class="sec fuel">'
+        + '<div class="sec-hdr"><span class="sec-ico">⛽</span>Recargas</div>'
+        + (fuel.length
+            ? '<table class="tbl"><thead><tr><th style="width:54px">Hora</th><th style="width:54px">Halcón</th><th>Lugar</th></tr></thead><tbody>' + fuelRows + '</tbody></table>'
+            : '<div class="empty">Sin recargas programadas</div>')
+        + '</div>'
+    : "";
 
   const card = document.createElement("div");
   card.className = "cia";
-
-  const opsHtml = activeTab !== "ALL" ? `
-    <div class="sec ops">
-      <div class="sec-hdr"><span class="sec-ico">📍</span>Operativos programados</div>
-      ${ops.length
-        ? \`<table class="tbl"><thead><tr><th style="width:54px">Hora</th><th style="width:54px">Halcón</th><th>Lugar</th></tr></thead><tbody>\${opsRows}</tbody></table>\`
-        : \`<div class="empty">Sin operativos programados</div>\`}
-    </div>
-    <div class="sec fuel">
-      <div class="sec-hdr"><span class="sec-ico">⛽</span>Recargas</div>
-      ${fuel.length
-        ? \`<table class="tbl"><thead><tr><th style="width:54px">Hora</th><th style="width:54px">Halcón</th><th>Lugar</th></tr></thead><tbody>\${fuelRows}</tbody></table>\`
-        : \`<div class="empty">Sin recargas programadas</div>\`}
-    </div>` : "";
-
-  card.innerHTML = `
-    <div class="cia-hdr">
-      <div class="cia-num">${id}</div>
-      <div class="cia-info">
-        <div class="cia-name">Compañía ${id}</div>
-        <div class="cia-sub">Unidad Operativa</div>
-      </div>
-      <div class="cia-pill">${dist.length} móviles</div>
-    </div>
-    <div class="sec dist">
-      <div class="sec-hdr"><span class="sec-ico">🚓</span>Distribución operativa</div>
-      ${dist.length
-        ? \`<table class="tbl"><thead><tr><th style="width:52px">Halcón</th><th>Sector</th><th style="width:36%">Agentes</th></tr></thead><tbody>\${distRows}</tbody></table>\`
-        : \`<div class="empty">Sin unidades asignadas</div>\`}
-    </div>
-    \${opsHtml}`;
+  card.innerHTML =
+    '<div class="cia-hdr">'
+      + '<div class="cia-num">' + id + '</div>'
+      + '<div class="cia-info">'
+        + '<div class="cia-name">Compañía ' + id + '</div>'
+        + '<div class="cia-sub">Unidad Operativa</div>'
+      + '</div>'
+      + '<div class="cia-pill">' + dist.length + ' móviles</div>'
+    + '</div>'
+    + '<div class="sec dist">'
+      + '<div class="sec-hdr"><span class="sec-ico">🚓</span>Distribución operativa</div>'
+      + distTable
+    + '</div>'
+    + opsSection;
 
   return card;
 }
