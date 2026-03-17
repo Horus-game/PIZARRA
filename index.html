@@ -239,17 +239,23 @@ async function fetchData() {
    STATS
 ══════════════════════════════════════════════ */
 function updateStats() {
-  let mov = 0, ops = 0, fuel = 0;
-  COMPANIAS.forEach(id => {
-    const d = data[id];
+  if (activeTab === "ALL") {
+    const halconesSet = new Set();
+    COMPANIAS.forEach(id => {
+      const d = data[id];
+      if (!d) return;
+      (d.distribucion || []).forEach(r => halconesSet.add(r.halcon));
+    });
+    document.getElementById("s-mov").textContent  = halconesSet.size;
+    document.getElementById("s-ops").textContent  = "—";
+    document.getElementById("s-fuel").textContent = "—";
+  } else {
+    const d = data[activeTab];
     if (!d) return;
-    mov  += (d.distribucion || []).length;
-    ops  += (d.operativos   || []).length;
-    fuel += (d.recargas     || []).length;
-  });
-  document.getElementById("s-mov").textContent  = mov;
-  document.getElementById("s-ops").textContent  = ops;
-  document.getElementById("s-fuel").textContent = fuel;
+    document.getElementById("s-mov").textContent  = (d.distribucion || []).length;
+    document.getElementById("s-ops").textContent  = (d.operativos   || []).length;
+    document.getElementById("s-fuel").textContent = (d.recargas     || []).length;
+  }
 }
 
 /* ══════════════════════════════════════════════
@@ -265,7 +271,7 @@ function mkTab(c, id, label, cls) {
   const b = document.createElement("button");
   b.className = cls + (activeTab === id ? " act" : "");
   b.textContent = label;
-  b.onclick = () => { activeTab = id; buildTabs(); render(); };
+  b.onclick = () => { activeTab = id; buildTabs(); render(); updateStats(); };
   c.appendChild(b);
 }
 
@@ -376,19 +382,20 @@ function mkCard(id, d) {
         : `<div class="empty">Sin unidades asignadas</div>`}
     </div>
 
+    ${activeTab !== "ALL" ? `
     <div class="sec ops">
       <div class="sec-hdr"><span class="sec-ico">📍</span>Operativos programados</div>
       ${ops.length
-        ? `<table class="tbl"><thead><tr><th style="width:54px">Hora</th><th style="width:54px">Halcón</th><th>Lugar</th></tr></thead><tbody>${opsRows}</tbody></table>`
-        : `<div class="empty">Sin operativos programados</div>`}
+        ? \`<table class="tbl"><thead><tr><th style="width:54px">Hora</th><th style="width:54px">Halcón</th><th>Lugar</th></tr></thead><tbody>${opsRows}</tbody></table>\`
+        : \`<div class="empty">Sin operativos programados</div>\`}
     </div>
 
     <div class="sec fuel">
       <div class="sec-hdr"><span class="sec-ico">⛽</span>Recargas</div>
       ${fuel.length
-        ? `<table class="tbl"><thead><tr><th style="width:54px">Hora</th><th style="width:54px">Halcón</th><th>Lugar</th></tr></thead><tbody>${fuelRows}</tbody></table>`
-        : `<div class="empty">Sin recargas programadas</div>`}
-    </div>`;
+        ? \`<table class="tbl"><thead><tr><th style="width:54px">Hora</th><th style="width:54px">Halcón</th><th>Lugar</th></tr></thead><tbody>${fuelRows}</tbody></table>\`
+        : \`<div class="empty">Sin recargas programadas</div>\`}
+    </div>` : ''}\`;
 
   return card;
 }
